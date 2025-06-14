@@ -138,80 +138,55 @@ export default function HomePage() {
         {/* 比赛信息横幅 */}
         <div className="mt-8 mb-6">
           <div className="card bg-gradient-to-r from-lychee-pink/10 to-lychee-green/10 border-lychee-pink/30">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center justify-center">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800 mb-2 flex items-center justify-center">
                 <span className="lychee-leaf mr-2">🍃</span>
-                "桂味杯"自走棋比赛规则
+                "桂味杯"比赛规则
                 <span className="lychee-leaf ml-2">🍃</span>
               </h2>
-              <div className="text-gray-600">
-                <strong>比赛时间：</strong>6月15日-6月20日 | 每晚21:30-24:00
+              <div className="text-sm text-gray-600">
+                <strong>时间：</strong>6.15-6.20 每晚21:30-24:00 | <strong>奖励：</strong>前三名获得桂味荔枝6斤
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* 积分规则 */}
               <div className="bg-white/50 rounded-xl p-4 border border-gray-200">
-                <h4 className="font-bold text-gray-800 mb-3 flex items-center">
-                  ⭐ 积分规则
-                </h4>
-                <div className="space-y-1 text-sm text-gray-700">
-                  <div>🥇 第1名：8分</div>
-                  <div>🥈 第2名：6分</div>
-                  <div>🥉 第3名：5分</div>
-                  <div>📍 第4名：4分</div>
-                  <div>📍 第5名：3分</div>
-                  <div>📍 第6名：2分</div>
-                  <div>📍 第7名：1分</div>
-                  <div>📍 第8名：0分</div>
+                <h4 className="font-bold text-gray-800 mb-2 text-center">⭐ 积分规则</h4>
+                <div className="text-center text-sm text-gray-700">
+                  1-8名分别获得：<br/>
+                  <strong className="text-lychee-pink">8-6-5-4-3-2-1-0分</strong>
                 </div>
               </div>
 
               {/* 斩杀阶段 */}
               <div className="bg-white/50 rounded-xl p-4 border border-orange-200">
-                <h4 className="font-bold text-gray-800 mb-3 flex items-center">
+                <h4 className="font-bold text-gray-800 mb-2 text-center">
                   <span className="fire mr-1">🔥</span> 斩杀阶段
                 </h4>
-                <div className="space-y-2 text-sm text-gray-700">
-                  <div>• <strong>触发条件：</strong>总积分≥25分</div>
-                  <div>• <strong>特殊标识：</strong>火焰图标显示</div>
-                  <div>• <strong>不再积分：</strong>只能争夺冠军</div>
-                  <div>• <strong>获胜条件：</strong>对局第一名</div>
+                <div className="text-center text-sm text-gray-700">
+                  达到<strong className="text-orange-600">25分</strong>进入斩杀<br/>
+                  吃鸡即可获得桂味之冠
                 </div>
               </div>
 
-              {/* 桂味之冠 */}
+              {/* 比赛结束 */}
               <div className="bg-white/50 rounded-xl p-4 border border-yellow-200">
-                <h4 className="font-bold text-gray-800 mb-3 flex items-center">
-                  <span className="crown mr-1">👑</span> 桂味之冠
+                <h4 className="font-bold text-gray-800 mb-2 text-center">
+                  <span className="crown mr-1">👑</span> 比赛结束
                 </h4>
-                <div className="space-y-2 text-sm text-gray-700">
-                  <div>• <strong>获得方式：</strong>斩杀阶段吃鸡</div>
-                  <div>• <strong>特殊效果：</strong>金色光晕显示</div>
-                  <div>• <strong>荣誉称号：</strong>"桂味之冠"</div>
-                  <div>• <strong>比赛地位：</strong>永久冠军</div>
-                </div>
-              </div>
-
-              {/* 奖励说明 */}
-              <div className="bg-white/50 rounded-xl p-4 border border-green-200">
-                <h4 className="font-bold text-gray-800 mb-3 flex items-center">
-                  🎁 奖励说明
-                </h4>
-                <div className="space-y-2 text-sm text-gray-700">
-                  <div>• <strong>前三名：</strong>桂味荔枝6斤</div>
-                  <div>• <strong>参赛规模：</strong>约10人</div>
-                  <div>• <strong>对局总数：</strong>约10场</div>
-                  <div>• <strong>结束条件：</strong>3位桂味之冠</div>
+                <div className="text-center text-sm text-gray-700">
+                  <strong className="text-yellow-600">3位</strong>桂味之冠产生后<br/>
+                  比赛自动结束
                 </div>
               </div>
             </div>
 
-            {/* 重要提示 */}
-            <div className="mt-4 p-3 bg-lychee-pink/10 border border-lychee-pink/30 rounded-lg">
-              <div className="text-center text-sm text-gray-700">
-                <strong className="text-lychee-pink">⚡ 重要：</strong>
-                当三位选手获得"桂味之冠"后，比赛将自动结束！快来报名参加这场激烈的荔枝主题自走棋大战吧！
+            {/* 简化的重要提示 */}
+            <div className="mt-3 p-2 bg-lychee-pink/10 border border-lychee-pink/30 rounded-lg">
+              <div className="text-center text-xs text-gray-600">
+                <strong className="text-lychee-pink">💡 提示：</strong>
+                斩杀阶段玩家不再获得积分，只争夺冠军！
               </div>
             </div>
           </div>
