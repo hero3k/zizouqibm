@@ -48,8 +48,9 @@ export default function HomePage() {
       const success = await saveTournamentData(newState);
       
       if (success) {
-        // 成功后刷新数据
-        mutate('tournament-data');
+        // 成功后确认本地数据就是最新的
+        mutate('tournament-data', newState, false);
+        showNotification('success', '数据已同步到云端');
       } else {
         // 失败时恢复原数据
         mutate('tournament-data');
@@ -68,7 +69,7 @@ export default function HomePage() {
     try {
       const newState = addPlayer(tournamentState, name);
       await updateTournamentData(newState);
-      showNotification('success', `${name} 报名成功！数据已同步到云端`);
+      showNotification('success', `${name} 报名成功！`);
     } catch (error) {
       showNotification('error', error instanceof Error ? error.message : '报名失败');
     }
