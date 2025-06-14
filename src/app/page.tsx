@@ -1,73 +1,87 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
 import { TournamentState } from '@/types/tournament';
 import { 
-  loadTournamentData, 
-  saveTournamentData, 
   addPlayer, 
   addMatch, 
   deleteMatch, 
-  getLeaderboard,
-  getStatusText,
-  getStatusClass 
+  getLeaderboard 
 } from '@/utils/tournament';
+import { fetchTournamentData, saveTournamentData } from '@/utils/api';
 import RegistrationForm from '@/components/RegistrationForm';
 import Leaderboard from '@/components/Leaderboard';
 import MatchManager from '@/components/MatchManager';
 import TournamentHeader from '@/components/TournamentHeader';
 
 export default function HomePage() {
-  const [tournamentState, setTournamentState] = useState<TournamentState>({
-    players: [],
-    matches: [],
-    isFinished: false,
-    championCount: 0
-  });
-
-  const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState<{
-    type: 'success' | 'error';
+    type: 'success' | 'error' | 'info';
     message: string;
   } | null>(null);
 
-  // 加载数据
-  useEffect(() => {
-    const data = loadTournamentData();
-    setTournamentState(data);
-    setLoading(false);
-  }, []);
-
-  // 保存数据
-  useEffect(() => {
-    if (!loading) {
-      saveTournamentData(tournamentState);
+  // 使用SWR进行数据同步
+  const { data: tournamentState, error, isLoading } = useSWR(
+    'tournament-data',
+    fetchTournamentData,
+    {
+      refreshInterval: 3000, // 每3秒自动刷新
+      revalidateOnFocus: true, // 页面获得焦点时刷新
+      revalidateOnReconnect: true, // 网络重连时刷新
     }
-  }, [tournamentState, loading]);
+  );
 
   // 显示通知
-  const showNotification = (type: 'success' | 'error', message: string) => {
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 3000);
   };
 
+  // 更新数据并同步到云端
+  const updateTournamentData = async (newState: TournamentState) => {
+    try {
+      // 先乐观更新本地数据
+      mutate('tournament-data', newState, false);
+      
+      // 保存到云端
+      const success = await saveTournamentData(newState);
+      
+      if (success) {
+        // 成功后刷新数据
+        mutate('tournament-data');
+      } else {
+        // 失败时恢复原数据
+        mutate('tournament-data');
+        showNotification('error', '同步失败，请检查网络连接');
+      }
+    } catch (error) {
+      showNotification('error', '操作失败');
+      mutate('tournament-data'); // 恢复数据
+    }
+  };
+
   // 处理报名
-  const handleRegistration = (name: string) => {
+  const handleRegistration = async (name: string) => {
+    if (!tournamentState) return;
+    
     try {
       const newState = addPlayer(tournamentState, name);
-      setTournamentState(newState);
-      showNotification('success', `${name} 报名成功！`);
+      await updateTournamentData(newState);
+      showNotification('success', `${name} 报名成功！数据已同步到云端`);
     } catch (error) {
       showNotification('error', error instanceof Error ? error.message : '报名失败');
     }
   };
 
   // 处理添加对局
-  const handleAddMatch = (results: { playerId: string; rank: number }[]) => {
+  const handleAddMatch = async (results: { playerId: string; rank: number }[]) => {
+    if (!tournamentState) return;
+    
     try {
       const newState = addMatch(tournamentState, results);
-      setTournamentState(newState);
-      showNotification('success', '对局添加成功！');
+      await updateTournamentData(newState);
+      showNotification('success', '对局添加成功！所有设备已同步更新');
       
       // 检查是否有新冠军
       if (newState.championCount > tournamentState.championCount) {
@@ -85,20 +99,51 @@ export default function HomePage() {
   };
 
   // 处理删除对局
-  const handleDeleteMatch = (matchId: string) => {
+  const handleDeleteMatch = async (matchId: string) => {
+    if (!tournamentState) return;
+    
     try {
       const newState = deleteMatch(tournamentState, matchId);
-      setTournamentState(newState);
-      showNotification('success', '对局删除成功！');
+      await updateTournamentData(newState);
+      showNotification('success', '对局删除成功！所有设备已同步更新');
     } catch (error) {
       showNotification('error', error instanceof Error ? error.message : '删除对局失败');
     }
   };
 
-  if (loading) {
+  // 加载状态
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white text-xl">加载中...</div>
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-lychee-pink border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-white text-xl">正在同步云端数据...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 错误状态
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-xl mb-4">⚠️ 网络连接失败</div>
+          <button 
+            onClick={() => mutate('tournament-data')}
+            className="btn-primary"
+          >
+            重新连接
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!tournamentState) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">初始化中...</div>
       </div>
     );
   }
@@ -107,12 +152,22 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen p-4">
+      {/* 云同步状态指示器 */}
+      <div className="fixed top-4 left-4 z-50">
+        <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs flex items-center">
+          <div className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></div>
+          云端同步
+        </div>
+      </div>
+
       {/* 通知组件 */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
           notification.type === 'success' 
             ? 'bg-green-500 text-white' 
-            : 'bg-red-500 text-white'
+            : notification.type === 'error'
+            ? 'bg-red-500 text-white'
+            : 'bg-blue-500 text-white'
         }`}>
           {notification.message}
         </div>
@@ -182,11 +237,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 简化的重要提示 */}
-            <div className="mt-3 p-2 bg-lychee-pink/10 border border-lychee-pink/30 rounded-lg">
-              <div className="text-center text-xs text-gray-600">
-                <strong className="text-lychee-pink">💡 提示：</strong>
-                斩杀阶段玩家不再获得积分，只争夺冠军！
+            {/* 云同步提示 */}
+            <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-center text-xs text-blue-600">
+                <strong>☁️ 云端同步：</strong>
+                所有设备实时同步，任何人都可以报名和添加对局！
               </div>
             </div>
           </div>
