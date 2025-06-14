@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 支持静态导出和服务端渲染
-  output: process.env.NETLIFY ? 'export' : undefined,
+  // 支持静态导出
+  output: 'export',
   
   // 关闭严格模式以避免开发时的双重渲染
   reactStrictMode: false,
@@ -14,9 +14,9 @@ const nextConfig = {
   // 支持Netlify Functions
   trailingSlash: true,
   
-  // 环境变量
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  // 禁用 API 路由（使用 Netlify Functions 代替）
+  experimental: {
+    appDir: true,
   },
 }
 

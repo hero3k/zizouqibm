@@ -72,6 +72,13 @@ npm run dev
 
 4. **部署完成**：Netlify会自动构建和部署
 
+### ⚠️ 重要说明
+
+**Netlify版本使用独立的函数架构：**
+- API端点：`/.netlify/functions/tournament`
+- 静态网站生成：避免服务端渲染问题
+- 云端数据同步：通过Upstash Redis
+
 ### 部署到Vercel（备选方案）
 
 1. **推送到GitHub**：

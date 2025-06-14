@@ -2,10 +2,10 @@
   command = "npm run build"
   publish = "out"
 
-# 处理Next.js API路由
+# 处理tournament API
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
+  from = "/api/tournament"
+  to = "/.netlify/functions/tournament"
   status = 200
 
 # SPA fallback
@@ -20,4 +20,4 @@
 
 # 函数配置
 [functions]
-  directory = "functions/" 
+  directory = "netlify/functions/" 
