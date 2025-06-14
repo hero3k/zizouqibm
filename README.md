@@ -50,7 +50,29 @@ npm run dev
 
 3. 打开浏览器访问：http://localhost:3000
 
-### 部署到Vercel（云同步版）
+### 部署到Netlify（推荐 - 国内访问稳定）
+
+1. **设置独立Redis数据库**：
+   - 访问 [Upstash Console](https://console.upstash.com/)
+   - 免费注册账号
+   - 创建新的Redis数据库（免费额度足够）
+   - 记录REST API URL和Token
+
+2. **部署到Netlify**：
+   - 访问 [netlify.com](https://netlify.com)
+   - 使用GitHub登录
+   - 点击"New site from Git"
+   - 选择GitHub仓库 `hero3k/zizouqibm`
+
+3. **配置环境变量**：
+   - 在Netlify项目设置中，找到"Environment variables"
+   - 添加以下变量：
+     - `UPSTASH_REDIS_REST_URL`: 您的Redis URL
+     - `UPSTASH_REDIS_REST_TOKEN`: 您的Redis Token
+
+4. **部署完成**：Netlify会自动构建和部署
+
+### 部署到Vercel（备选方案）
 
 1. **推送到GitHub**：
 ```bash
@@ -102,8 +124,8 @@ git push origin main
 - **前端**：Next.js 14 + React + TypeScript
 - **数据同步**：SWR (实时数据获取)
 - **后端API**：Next.js API Routes
-- **数据库**：Vercel KV (Redis)
-- **部署**：Vercel (自动扩展)
+- **数据库**：Upstash Redis (跨平台)
+- **部署**：Netlify/Vercel (自动扩展)
 
 ### ☁️ 云端优势
 - **多设备同步**：所有设备实时同步
@@ -118,8 +140,8 @@ git push origin main
 - **类型检查**：TypeScript
 - **数据同步**：SWR
 - **后端API**：Next.js API Routes
-- **数据库**：Vercel KV (Redis)
-- **部署平台**：Vercel
+- **数据库**：Upstash Redis (跨平台)
+- **部署平台**：Netlify/Vercel
 
 ## 📂 项目结构
 

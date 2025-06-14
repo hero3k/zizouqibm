@@ -1,13 +1,53 @@
-import { kv } from '@vercel/kv';
 import { NextRequest, NextResponse } from 'next/server';
 import { TournamentState } from '@/types/tournament';
 
 const TOURNAMENT_KEY = 'guiwei-cup-tournament-data';
 
+// 通用Redis客户端
+const getRedisClient = () => {
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+  
+  if (!url || !token) {
+    throw new Error('Redis credentials not configured');
+  }
+  
+  return {
+    async get(key: string) {
+      const response = await fetch(`${url}/get/${key}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      return data.result ? JSON.parse(data.result) : null;
+    },
+    
+    async set(key: string, value: any) {
+      const response = await fetch(`${url}/set/${key}`, {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(value)
+      });
+      return response.ok;
+    },
+    
+    async del(key: string) {
+      const response = await fetch(`${url}/del/${key}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.ok;
+    }
+  };
+};
+
 // 获取比赛数据
 export async function GET() {
   try {
-    const data = await kv.get<TournamentState>(TOURNAMENT_KEY);
+    const redis = getRedisClient();
+    const data = await redis.get(TOURNAMENT_KEY) as TournamentState;
     
     if (!data) {
       // 如果没有数据，返回初始状态
@@ -44,7 +84,8 @@ export async function POST(request: NextRequest) {
     }
     
     // 保存到云数据库
-    await kv.set(TOURNAMENT_KEY, data);
+    const redis = getRedisClient();
+    await redis.set(TOURNAMENT_KEY, data);
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -59,7 +100,8 @@ export async function POST(request: NextRequest) {
 // 重置比赛数据（调试用）
 export async function DELETE() {
   try {
-    await kv.del(TOURNAMENT_KEY);
+    const redis = getRedisClient();
+    await redis.del(TOURNAMENT_KEY);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to reset tournament data:', error);
