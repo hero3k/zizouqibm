@@ -26,9 +26,11 @@ export default function HomePage() {
     'tournament-data',
     fetchTournamentData,
     {
-      refreshInterval: 3000, // 每3秒自动刷新
+      refreshInterval: 10000, // 延长到10秒自动刷新
       revalidateOnFocus: true, // 页面获得焦点时刷新
       revalidateOnReconnect: true, // 网络重连时刷新
+      revalidateOnMount: true, // 组件挂载时刷新
+      dedupingInterval: 5000, // 5秒内去重
     }
   );
 
@@ -48,9 +50,10 @@ export default function HomePage() {
       const success = await saveTournamentData(newState);
       
       if (success) {
-        // 成功后确认本地数据就是最新的
-        mutate('tournament-data', newState, false);
-        showNotification('success', '数据已同步到云端');
+        // 成功后等待一小段时间再确认，避免竞争
+        setTimeout(() => {
+          mutate('tournament-data', newState, false);
+        }, 100);
       } else {
         // 失败时恢复原数据
         mutate('tournament-data');
@@ -69,7 +72,7 @@ export default function HomePage() {
     try {
       const newState = addPlayer(tournamentState, name);
       await updateTournamentData(newState);
-      showNotification('success', `${name} 报名成功！`);
+      showNotification('success', `${name} 报名成功！数据已同步到云端`);
     } catch (error) {
       showNotification('error', error instanceof Error ? error.message : '报名失败');
     }

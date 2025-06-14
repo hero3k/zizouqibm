@@ -18,18 +18,18 @@ const getRedisClient = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
+      console.log('Redis GET response:', data);
       return data.result ? JSON.parse(data.result) : null;
     },
     
     async set(key: string, value: any) {
-      const response = await fetch(`${url}/set/${key}`, {
-        method: 'POST',
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(value)
+      const jsonValue = JSON.stringify(value);
+      console.log('Redis SET data:', jsonValue);
+      const response = await fetch(`${url}/set/${key}/${encodeURIComponent(jsonValue)}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
+      const result = await response.json();
+      console.log('Redis SET response:', result);
       return response.ok;
     },
     
